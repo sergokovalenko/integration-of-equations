@@ -14,6 +14,23 @@ const calculationsForRectangle = (a, h, n) => {
   return result * h;
 }
 
+const calculateIntegralUsingRectangleMethod = (a, b, n, eps = 0.001) => {
+  let h = calcStep(a, b, n);
+  let n1 = calculationsForRectangle(a, h, n);
+  n *= 2;
+  h = calcStep(a, b, n);
+  let n2 = calculationsForRectangle(a, h, n);
+
+  while (Math.abs(n2 - n1) > eps) {
+    n1 = n2;
+    n *= 2;
+    h = calcStep(a, b, n);
+    n2 = calculationsForRectangle(a, h, n);
+  }
+
+  return h;
+}
+
 const calculationsForTrapezium = (a, h, n) => {
   let result = 0;
   for (let i = 0; i <= n; i++) {
