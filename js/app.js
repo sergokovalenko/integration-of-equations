@@ -1,36 +1,24 @@
 const F = (x) => x * 2;
-
 const calcStep = (a, b, n) => (b - a) / n;
 const calcNextX = (a, i, h) => a + (i + 1 / 2) * h;
 const calcNextX2 = (a, i, h) => a + i * h;
 
 const calculationsForRectangle = (a, h, n) => {
+  const calculatedValues = {};
   let result = 0;
+
   for (let i = 0; i < n; i++) {
     let x = calcNextX(a, i, h);
-    result += F(x);
+
+    calculatedValues[x] = F(x);
+    result += calculatedValues[x];
   }
 
-  return result * h;
-}
-
-const calculateIntegralUsingRectangleMethod = (a, b, n, eps = 0.001) => {
-  let h = calcStep(a, b, n);
-  let n1 = calculationsForRectangle(a, h, n);
-
-  n *= 2;
-  h = calcStep(a, b, n);
-  let n2 = calculationsForRectangle(a, h, n);
-
-  while (Math.abs(n2 - n1) > eps) {
-    n1 = n2;
-    n *= 2;
-    h = calcStep(a, b, n);
-    n2 = calculationsForRectangle(a, h, n);
-  }
-
-  return h;
-}
+  return {
+    result: result * h,
+    calculatedValues
+  }  
+};
 
 const calculationsForTrapezium = (a, h, n, funcValues = {}) => {
   let result = 0;
@@ -58,29 +46,7 @@ const calculationsForTrapezium = (a, h, n, funcValues = {}) => {
     result: result * h,
     calculatedValues
   }  
-}
-
-const calculateIntegralUsingTrapeziumMethod = (a, b, n, eps = 0.001) => {
-  let h = calcStep(a, b, n);
-  let result;
-  let calculatedValues;
-  ({ result, calculatedValues }) = calculationsForTrapezium(a, h, n);
-  let n1 = result;
-  n *= 2;
-  h = calcStep(a, b, n);
-  ({ result, calculatedValues }) = calculationsForTrapezium(a, h, n, calculatedValues);
-  let n2 = result;
-
-  while (Math.abs(n2 - n1) > eps) {
-    n1 = n2;
-    n *= 2;
-    h = calcStep(a, b, n);
-    ({ result, calculatedValues }) = calculationsForTrapezium(a, h, n, calculatedValues);
-    n2 = result;
-  }
-
-  return h;
-}
+};
 
 const calculationsForParabola = (a, h, n, funcValues = {}) => {
   let result = F(calcNextX2(a, 0, h));
@@ -110,48 +76,50 @@ const calculationsForParabola = (a, h, n, funcValues = {}) => {
     result: result * h / 3,
     calculatedValues
   };
-}
+};
 
-const calculateIntegralUsingParabolaMethod = (a, b, n, eps = 0.001) => {
+const calculateIntegralUsingType = (a, b, n, calculator, eps = 0.001) => {
   let h = calcStep(a, b, n);
   let result;
   let calculatedValues;
-  ({ result, calculatedValues }) = calculationsForParabola(a, h, n);
+  ({ result, calculatedValues }) = calculator(a, h, n);
   let n1 = result;
   n *= 2;
   h = calcStep(a, b, n);
-  ({ result, calculatedValues }) = calculationsForParabola(a, h, n, calculatedValues);
+  ({ result, calculatedValues }) = calculator(a, h, n, calculatedValues);
   let n2 = result;
 
   while (Math.abs(n2 - n1) > eps) {
     n1 = n2;
     n *= 2;
     h = calcStep(a, b, n);
-    ({ result, calculatedValues }) = calculationsForParabola(a, h, n, calculatedValues);
+    ({ result, calculatedValues }) = calculator(a, h, n, calculatedValues);
     n2 = result;
   }
 
-  return h;
-}
+  return {
+    result: n2,
+    calculatedValues
+  };
+};
 
-
-const calculateIntegral = (a, b, n, type) => {
-  let result = 0;
+const calculateIntegral = (a, b, n, type, eps = 0.001) => {
+  let result = null;
 
   switch (type) {
     case 0: 
-      result = calculateIntegralUsingRectangleMethod(a, b, n);
+      result = calculateIntegralUsingType(a, b, n, calculationsForRectangle);
       break;
     case 1:
-      result = calculateIntegralUsingTrapeziumMethod(a, b, n);
+      result = calculateIntegralUsingType(a, b, n, calculationsForTrapezium);
       break;
     case 2:
-      result = calculationsForParabola(a, b, n);
+      result = calculateIntegralUsingType(a, b, n, calculationsForParabola);
       break;
   }
 
   return result;
-}
+};
 
 window.onload = () => {
   const resBlock = document.getElementById('result');
