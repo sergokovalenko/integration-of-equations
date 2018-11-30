@@ -31,18 +31,53 @@ const calculateIntegralUsingRectangleMethod = (a, b, n, eps = 0.001) => {
   return h;
 }
 
-const calculationsForTrapezium = (a, h, n) => {
+const calculationsForTrapezium = (a, h, n, funcValues = {}) => {
   let result = 0;
+  const calculatedValues = { ...funcValues };
+
   for (let i = 0; i <= n; i++) {
     let x = calcNextX2(a, i, h);
-    if (i === 0 || i === n) {
-      result += F(x) / 2;
+    const funtionResult = 0;
+
+    if (calculatedValues[x] && typeof calculatedValues[x] === 'number') {
+      funtionResult = calculatedValues[x];
     } else {
-      result += F(x)
+      funtionResult = F(x);
+    }
+
+    if (i === 0 || i === n) {
+      result += funtionResult / 2;
+    } else {
+      result += funtionResult
     }
   }
 
-  return result * h;
+  return {
+    result: result * h,
+    calculatedValues
+  }  
+}
+
+const calculateIntegralUsingTrapeziumMethod = (a, b, n, eps = 0.001) => {
+  let h = calcStep(a, b, n);
+  let result;
+  let calculatedValues;
+  ({ result, calculatedValues }) = calculationsForTrapezium(a, h, n);
+  let n1 = result;
+  n *= 2;
+  h = calcStep(a, b, n);
+  ({ result, calculatedValues }) = calculationsForTrapezium(a, h, n, calculatedValues);
+  let n2 = result;
+
+  while (Math.abs(n2 - n1) > eps) {
+    n1 = n2;
+    n *= 2;
+    h = calcStep(a, b, n);
+    ({ result, calculatedValues }) = calculationsForTrapezium(a, h, n, calculatedValues);
+    n2 = result;
+  }
+
+  return h;
 }
 
 const calculationsForParabola = (a, h, n) => {
