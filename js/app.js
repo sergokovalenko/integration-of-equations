@@ -128,6 +128,12 @@ const calculateIntegral = (from, to, stepCount, type, func = F1, eps = 0.001) =>
   return result;
 };
 
+const calculateFirstFunction = (from, to, stepCount, eps = 0.001) => ({
+  rectMethod: calculateIntegral(from, to, stepCount, 0, F1, eps).result,
+  trapezMethod: calculateIntegral(from, to, stepCount, 1, F1, eps).result,
+  parabMethod: calculateIntegral(from, to, stepCount, 2, F1, eps).result
+});
+
 const calculateSecondFunction = (c, d, m, u, a2, b2, n) => {
   const result = [];
   const h = calcStep(c, d, m);
@@ -149,6 +155,8 @@ const calculateSecondFunction = (c, d, m, u, a2, b2, n) => {
   return result;
 }
 
+const round = (num) => Math.round(num * 100) / 100;
+
 window.onload = () => {
   const resBlock = document.getElementById('result');
   const n = 50;
@@ -160,7 +168,19 @@ window.onload = () => {
   const d = 1.5;
   const m = 10;
   const u = -0.01;
+  const first = calculateFirstFunction(a1, b1, n);
+  const scnd = calculateSecondFunction(c, d, m, u, a2, b2, n);
+  let UI = `<div><span>First function result:</span></div>` +
+           `<div><span>Reactangle: </span>${first.rectMethod}</div>` +
+           `<div><span>Trapezium: </span>${first.trapezMethod}</div>` +
+           `<div><span>Parabola: </span>${first.parabMethod}</div>`;
 
-  console.log(calculateIntegral(a1, b1, n, 0));
-  console.log(calculateSecondFunction(c, d, m, u, a2, b2, n));
+  UI += '<table border="1"><tr><th>i</th><th>ti</th><th>Rectangle</th><th>Trapezium</th><th>Parabola</th></tr>';
+
+  scnd.forEach((el, i) => {
+    UI += `<tr><td>${i}</td><td>${round(el.t)}</td><td>${el.rectMethod}</td><td>${el.trapezMethod}</td><td>${el.parabMethod}</td></tr>`;
+  });
+
+  UI += '</table>';
+  resBlock.innerHTML = UI;
 };
