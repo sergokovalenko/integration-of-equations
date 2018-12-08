@@ -110,23 +110,44 @@ const calculateIntegralUsingType = (a, b, n, func, calculator, eps = 0.001) => {
   };
 };
 
-const calculateIntegral = (from, to, stepCount, type, eps = 0.001) => {
+const calculateIntegral = (from, to, stepCount, type, func = F1, eps = 0.001) => {
   let result = null;
 
   switch (type) {
     case 0:
-      result = calculateIntegralUsingType(from, to, stepCount, F1, calculationsForRectangle, eps);
+      result = calculateIntegralUsingType(from, to, stepCount, func, calculationsForRectangle, eps);
       break;
     case 1:
-      result = calculateIntegralUsingType(from, to, stepCount, F1, calculationsForTrapezium, eps);
+      result = calculateIntegralUsingType(from, to, stepCount, func, calculationsForTrapezium, eps);
       break;
     case 2:
-      result = calculateIntegralUsingType(from, to, stepCount, F1, calculationsForParabola, eps);
+      result = calculateIntegralUsingType(from, to, stepCount, func, calculationsForParabola, eps);
       break;
   }
 
   return result;
 };
+
+const calculateSecondFunction = (c, d, m, u, a2, b2, n) => {
+  const result = [];
+  const h = calcStep(c, d, m);
+  
+
+  for (let i = 0; i < m; i += 1) {
+    const t = c + i * h
+    const HOFfunc = (x) => F2(t, x, u); // wrapper for F2 function for saving t and u arguments
+    const resObject = {
+      t,
+      rectMethod: calculateIntegral(a2, b2, n, 0, HOFfunc).result,
+      trapezMethod: calculateIntegral(a2, b2, n, 1, HOFfunc).result,
+      parabMethod: calculateIntegral(a2, b2, n, 1, HOFfunc).result
+    };
+
+    result.push(resObject);
+  }
+
+  return result;
+}
 
 window.onload = () => {
   const resBlock = document.getElementById('result');
@@ -141,4 +162,5 @@ window.onload = () => {
   const u = -0.01;
 
   console.log(calculateIntegral(a1, b1, n, 0));
+  console.log(calculateSecondFunction(c, d, m, u, a2, b2, n));
 };
