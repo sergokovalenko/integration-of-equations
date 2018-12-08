@@ -1,26 +1,33 @@
-const F = (x) => x * 2;
+const calcFunctionArgument = (t, x, u) => t / (1 + x * x) + u * x;
+const F1 = (x) => Math.pow(Math.E, x) * Math.sin(x);
+const W = (z) => (1 - z * z) / (1 + z * z);
+const U = (z) => Math.sin(z);
+const F2 = (t, x, u) => {
+  const arg = calcFunctionArgument(t, x, u);
+  return U(arg) * W(x);
+}
 const calcStep = (a, b, n) => (b - a) / n;
 const calcNextX = (a, i, h) => a + (i + 1 / 2) * h;
 const calcNextX2 = (a, i, h) => a + i * h;
 
-const calculationsForRectangle = (a, h, n) => {
+const calculationsForRectangle = (a, h, n, func) => {
   const calculatedValues = {};
   let result = 0;
 
   for (let i = 0; i < n; i++) {
     let x = calcNextX(a, i, h);
 
-    calculatedValues[x] = F(x);
+    calculatedValues[x] = func(x);
     result += calculatedValues[x];
   }
 
   return {
     result: result * h,
     calculatedValues
-  }  
+  }
 };
 
-const calculationsForTrapezium = (a, h, n, funcValues = {}) => {
+const calculationsForTrapezium = (a, h, n, func, funcValues = {}) => {
   let result = 0;
   const calculatedValues = { ...funcValues };
 
@@ -31,7 +38,7 @@ const calculationsForTrapezium = (a, h, n, funcValues = {}) => {
     if (calculatedValues[x] && typeof calculatedValues[x] === 'number') {
       funtionResult = calculatedValues[x];
     } else {
-      funtionResult = F(x);
+      funtionResult = func(x);
       calculatedValues[x] = funtionResult;
     }
 
@@ -45,11 +52,11 @@ const calculationsForTrapezium = (a, h, n, funcValues = {}) => {
   return {
     result: result * h,
     calculatedValues
-  }  
+  }
 };
 
-const calculationsForParabola = (a, h, n, funcValues = {}) => {
-  let result = F(calcNextX2(a, 0, h));
+const calculationsForParabola = (a, h, n, func, funcValues = {}) => {
+  let result = func(calcNextX2(a, 0, h));
   const calculatedValues = { ...funcValues };
 
   for (let i = 1; i < n; i++) {
@@ -59,7 +66,7 @@ const calculationsForParabola = (a, h, n, funcValues = {}) => {
     if (calculatedValues[x] && typeof calculatedValues[x] === 'number') {
       funtionResult = calculatedValues[x];
     } else {
-      funtionResult = F(x);
+      funtionResult = func(x);
       calculatedValues[x] = funtionResult;
     }
 
@@ -70,7 +77,7 @@ const calculationsForParabola = (a, h, n, funcValues = {}) => {
     }
   }
 
-  result += F(calcNextX2(a, n, h));
+  result += func(calcNextX2(a, n, h));
 
   return {
     result: result * h / 3,
@@ -78,22 +85,22 @@ const calculationsForParabola = (a, h, n, funcValues = {}) => {
   };
 };
 
-const calculateIntegralUsingType = (a, b, n, calculator, eps = 0.001) => {
+const calculateIntegralUsingType = (a, b, n, func, calculator, eps = 0.001) => {
   let h = calcStep(a, b, n);
-  let result;
-  let calculatedValues;
-  ({ result, calculatedValues }) = calculator(a, h, n);
+  let { result, calculatedValues } = calculator(a, h, n, func);
   let n1 = result;
+
   n *= 2;
   h = calcStep(a, b, n);
-  ({ result, calculatedValues }) = calculator(a, h, n, calculatedValues);
+  ({ result, calculatedValues } = calculator(a, h, n, func, calculatedValues));
+
   let n2 = result;
 
   while (Math.abs(n2 - n1) > eps) {
     n1 = n2;
     n *= 2;
     h = calcStep(a, b, n);
-    ({ result, calculatedValues }) = calculator(a, h, n, calculatedValues);
+    ({ result, calculatedValues } = calculator(a, h, n, func, calculatedValues));
     n2 = result;
   }
 
@@ -103,18 +110,18 @@ const calculateIntegralUsingType = (a, b, n, calculator, eps = 0.001) => {
   };
 };
 
-const calculateIntegral = (a, b, n, type, eps = 0.001) => {
+const calculateIntegral = (from, to, stepCount, type, eps = 0.001) => {
   let result = null;
 
   switch (type) {
-    case 0: 
-      result = calculateIntegralUsingType(a, b, n, calculationsForRectangle);
+    case 0:
+      result = calculateIntegralUsingType(from, to, stepCount, F1, calculationsForRectangle, eps);
       break;
     case 1:
-      result = calculateIntegralUsingType(a, b, n, calculationsForTrapezium);
+      result = calculateIntegralUsingType(from, to, stepCount, F1, calculationsForTrapezium, eps);
       break;
     case 2:
-      result = calculateIntegralUsingType(a, b, n, calculationsForParabola);
+      result = calculateIntegralUsingType(from, to, stepCount, F1, calculationsForParabola, eps);
       break;
   }
 
@@ -124,6 +131,14 @@ const calculateIntegral = (a, b, n, type, eps = 0.001) => {
 window.onload = () => {
   const resBlock = document.getElementById('result');
   const n = 50;
-  const a = 0;
-  const b = 1;
+  const a1 = 0;
+  const b1 = 1;
+  const a2 = 0;
+  const b2 = Math.PI / 2;
+  const c = 0.5;
+  const d = 1.5;
+  const m = 10;
+  const u = -0.01;
+
+  console.log(calculateIntegral(a1, b1, n, 0));
 };
